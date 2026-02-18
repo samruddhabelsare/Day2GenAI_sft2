@@ -46,16 +46,16 @@ def load_vectorstore():
     
     return db
 
-db= load_vectorstore
+db= load_vectorstore()
 
 # extra stop - load LLM
-llm=Ollama("model=gemma2:2b")
+llm=Ollama(model="gemma2:2b")
 
 # last step - chat interface 
 user_question=st.text_input("Ask question about C++")
 
 if user_question:
-    with st.spinner("RUk ja bhai , sochne de ....."):
+    with st.spinner("Ruk ja bhai , sochne de ....."):
         docs=db.similarity_search(user_question)
         
         # combine cotext (construction)
@@ -65,5 +65,24 @@ if user_question:
         
         context = "\n ".join([doc.page_content for doc in docs])
         
+        # prompt enggenering
+        prompt = f""" answer the question using only context below.
         
+        context :{context}
+        
+        Question : {user_question}
+        
+        Answer : 
+        """
+        
+        # created structure prompts 
+        # 1. provides context
+        # 2. provides question
+        # 3. ask for answer 
+        
+        # This is how hallucinations effect is reduced 
+        
+        response = llm.invoke(prompt)
+        st.subheader("Answer : ")
+        st.write(response) 
     
